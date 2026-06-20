@@ -28,6 +28,7 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -46,8 +47,24 @@
             font-weight: 600;
             color: #64748b;
             transition: all 0.3s ease;
-            position: relative;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin-top: -20px;
             z-index: 10;
+        }
+
+        .step-label {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .step {
+            position: relative;
+            height: 60px;
         }
 
         .step.active .step-circle {
@@ -134,22 +151,22 @@
 <body class="antialiased min-h-screen pt-24 pb-16">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Progress Bar -->
-        <div class="flex justify-between items-center mb-12 relative" id="progressBar">
-            <div class="absolute top-1/2 left-0 right-0 h-1 bg-slate-200 -translate-y-1/2"></div>
-            <div class="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 transition-all duration-300" id="progressBarFill"></div>
-            <div class="step active relative z-10 flex flex-col items-center gap-2" data-step="1">
+        <div class="flex justify-between mb-12 relative" id="progressBar" style="height: 60px;">
+            <div class="absolute top-1/2 left-0 right-0 h-1 bg-slate-200 -translate-y-1/2 z-0"></div>
+            <div class="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 transition-all duration-300 z-0" id="progressBarFill"></div>
+            <div class="step active relative z-10" data-step="1">
                 <div class="step-circle">1</div>
                 <div class="step-label">Choose Plan</div>
             </div>
-            <div class="step relative z-10 flex flex-col items-center gap-2" data-step="2">
+            <div class="step relative z-10" data-step="2">
                 <div class="step-circle">2</div>
                 <div class="step-label">Account</div>
             </div>
-            <div class="step relative z-10 flex flex-col items-center gap-2" data-step="3">
+            <div class="step relative z-10" data-step="3">
                 <div class="step-circle">3</div>
                 <div class="step-label">Payment</div>
             </div>
-            <div class="step relative z-10 flex flex-col items-center gap-2" data-step="4">
+            <div class="step relative z-10" data-step="4">
                 <div class="step-circle">4</div>
                 <div class="step-label">Complete</div>
             </div>
@@ -227,6 +244,12 @@
     </div>
 
     <script>
+        // Initialize Supabase client
+        const SupabaseClient = supabase.createClient(
+            'https://biixliljqnnbfznxbtci.supabase.co',
+            'sb_publishable_n1kfuQkqv5ZRFgTBhpRtnQ_5qLPSjcT'
+        );
+
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const pricingChosen = urlParams.get('pricingchosen');
@@ -286,7 +309,7 @@
             updateProgressBar(4);
         }
 
-        function goToNextStep() {
+        async function goToNextStep() {
             // Validate account form
             const name = document.getElementById('accountName');
             const email = document.getElementById('accountEmail');
@@ -316,12 +339,33 @@
             }
             
             if (isValid) {
-                if (currentPlan === 'basic') {
-                    // Skip payment step for basic plan
-                    goToSuccessStep();
-                } else {
-                    // Go to payment step for standard plan
-                    goToPaymentStep();
+                try {
+                    // Sign up user with Supabase
+                    const { data, error } = await SupabaseClient.auth.signUp({
+                        email: email.value,
+                        password: password.value,
+                        options: {
+                            data: {
+                                full_name: name.value,
+                                plan: currentPlan
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        alert('Error creating account: ' + error.message);
+                        return;
+                    }
+
+                    if (currentPlan === 'basic') {
+                        // Skip payment step for basic plan
+                        goToSuccessStep();
+                    } else {
+                        // Go to payment step for standard plan
+                        goToPaymentStep();
+                    }
+                } catch (error) {
+                    alert('Error creating account: ' + error.message);
                 }
             }
         }
