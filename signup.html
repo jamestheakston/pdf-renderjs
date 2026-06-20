@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e0e0e0;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .progress-bar-fill {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            background: #667eea;
+            transform: translateY(-50%);
+            z-index: 2;
+            transition: width 0.3s ease;
+        }
+
+        .step {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-circle {
+            background: #667eea;
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background: #667eea;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .plan-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .plan-info h2 {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .plan-info .price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .plan-info .price span {
+            font-size: 16px;
+            font-weight: 400;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input.error {
+            border-color: #e74c3c;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group input.error + .error-message {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .payment-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .payment-info p {
+            color: #856404;
+            margin: 0;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        #enhanci-pricing-widget {
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+            <div class="step active" data-step="1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Choose Plan</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Account</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Payment</div>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-circle">4</div>
+                <div class="step-label">Complete</div>
+            </div>
+        </div>
+
+        <!-- Pricing Selection (Step 1) -->
+        <div id="pricingSection">
+            <h1>Choose Your Plan</h1>
+            <script defer src="https://enhanci-widgets.s3.eu-west-2.amazonaws.com/widgets/widget.0c988b03-0419-4c29-a375-41b2cc325b9d.js"></script>
+            <div id="enhanci-pricing-widget"></div>
+        </div>
+
+        <!-- Basic Plan Signup Form -->
+        <div id="basicSignupSection" class="hidden">
+            <button class="back-btn" onclick="goBack()">← Back to Plans</button>
+            <h1>Sign Up - Basic Plan</h1>
+            <div class="plan-info">
+                <h2>Basic Plan</h2>
+                <div class="price">Free</div>
+            </div>
+            <form id="basicSignupForm">
+                <div class="form-group">
+                    <label for="basicName">Full Name</label>
+                    <input type="text" id="basicName" name="name" required>
+                    <div class="error-message">Please enter your name</div>
+                </div>
+                <div class="form-group">
+                    <label for="basicEmail">Email Address</label>
+                    <input type="email" id="basicEmail" name="email" required>
+                    <div class="error-message">Please enter a valid email address</div>
+                </div>
+                <div class="form-group">
+                    <label for="basicPassword">Password</label>
+                    <input type="password" id="basicPassword" name="password" required minlength="8">
+                    <div class="error-message">Password must be at least 8 characters</div>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+        </div>
+
+        <!-- Standard Plan Signup Form -->
+        <div id="standardSignupSection" class="hidden">
+            <button class="back-btn" onclick="goBack()">← Back to Plans</button>
+            <h1>Sign Up - Standard Plan</h1>
+            <div class="plan-info">
+                <h2>Standard Plan</h2>
+                <div class="price">£3<span>/month</span></div>
+            </div>
+            <div class="payment-info">
+                <p>You will be charged £3/month for the Standard Plan</p>
+            </div>
+            <form id="standardSignupForm">
+                <div class="form-group">
+                    <label for="standardName">Full Name</label>
+                    <input type="text" id="standardName" name="name" required>
+                    <div class="error-message">Please enter your name</div>
+                </div>
+                <div class="form-group">
+                    <label for="standardEmail">Email Address</label>
+                    <input type="email" id="standardEmail" name="email" required>
+                    <div class="error-message">Please enter a valid email address</div>
+                </div>
+                <div class="form-group">
+                    <label for="standardPassword">Password</label>
+                    <input type="password" id="standardPassword" name="password" required minlength="8">
+                    <div class="error-message">Password must be at least 8 characters</div>
+                </div>
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" required>
+                    <div class="error-message">Please enter a valid card number</div>
+                </div>
+                <div class="form-group">
+                    <label for="expiryDate">Expiry Date</label>
+                    <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" required>
+                    <div class="error-message">Please enter expiry date</div>
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="text" id="cvv" name="cvv" placeholder="123" required>
+                    <div class="error-message">Please enter CVV</div>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const pricingChosen = urlParams.get('pricingchosen');
+
+        const pricingSection = document.getElementById('pricingSection');
+        const basicSignupSection = document.getElementById('basicSignupSection');
+        const standardSignupSection = document.getElementById('standardSignupSection');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const steps = document.querySelectorAll('.step');
+
+        function updateProgressBar(step) {
+            const percentage = ((step - 1) / 3) * 100;
+            progressBarFill.style.width = percentage + '%';
+            
+            steps.forEach((stepEl, index) => {
+                const stepNum = index + 1;
+                stepEl.classList.remove('active', 'completed');
+                if (stepNum === step) {
+                    stepEl.classList.add('active');
+                } else if (stepNum < step) {
+                    stepEl.classList.add('completed');
+                }
+            });
+        }
+
+        function goBack() {
+            window.location.href = '/signup.html';
+        }
+
+        // Handle different states based on pricingchosen parameter
+        if (!pricingChosen || pricingChosen === 'false') {
+            // Show pricing selection (Step 1)
+            pricingSection.classList.remove('hidden');
+            basicSignupSection.classList.add('hidden');
+            standardSignupSection.classList.add('hidden');
+            updateProgressBar(1);
+        } else if (pricingChosen === 'basic') {
+            // Show basic signup form (Step 2)
+            pricingSection.classList.add('hidden');
+            basicSignupSection.classList.remove('hidden');
+            standardSignupSection.classList.add('hidden');
+            updateProgressBar(2);
+        } else if (pricingChosen === 'standard') {
+            // Show standard signup form with payment (Step 2)
+            pricingSection.classList.add('hidden');
+            basicSignupSection.classList.add('hidden');
+            standardSignupSection.classList.remove('hidden');
+            updateProgressBar(2);
+        }
+
+        // Form validation and submission
+        document.getElementById('basicSignupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('basicName');
+            const email = document.getElementById('basicEmail');
+            const password = document.getElementById('basicPassword');
+            
+            let isValid = true;
+            
+            if (!name.value.trim()) {
+                name.classList.add('error');
+                isValid = false;
+            } else {
+                name.classList.remove('error');
+            }
+            
+            if (!email.value.trim() || !email.value.includes('@')) {
+                email.classList.add('error');
+                isValid = false;
+            } else {
+                email.classList.remove('error');
+            }
+            
+            if (password.value.length < 8) {
+                password.classList.add('error');
+                isValid = false;
+            } else {
+                password.classList.remove('error');
+            }
+            
+            if (isValid) {
+                alert('Basic account created successfully!');
+                // Here you would typically submit the form to your backend
+            }
+        });
+
+        document.getElementById('standardSignupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('standardName');
+            const email = document.getElementById('standardEmail');
+            const password = document.getElementById('standardPassword');
+            const cardNumber = document.getElementById('cardNumber');
+            const expiryDate = document.getElementById('expiryDate');
+            const cvv = document.getElementById('cvv');
+            
+            let isValid = true;
+            
+            if (!name.value.trim()) {
+                name.classList.add('error');
+                isValid = false;
+            } else {
+                name.classList.remove('error');
+            }
+            
+            if (!email.value.trim() || !email.value.includes('@')) {
+                email.classList.add('error');
+                isValid = false;
+            } else {
+                email.classList.remove('error');
+            }
+            
+            if (password.value.length < 8) {
+                password.classList.add('error');
+                isValid = false;
+            } else {
+                password.classList.remove('error');
+            }
+            
+            if (!cardNumber.value.trim()) {
+                cardNumber.classList.add('error');
+                isValid = false;
+            } else {
+                cardNumber.classList.remove('error');
+            }
+            
+            if (!expiryDate.value.trim()) {
+                expiryDate.classList.add('error');
+                isValid = false;
+            } else {
+                expiryDate.classList.remove('error');
+            }
+            
+            if (!cvv.value.trim()) {
+                cvv.classList.add('error');
+                isValid = false;
+            } else {
+                cvv.classList.remove('error');
+            }
+            
+            if (isValid) {
+                alert('Standard account created successfully!');
+                // Here you would typically submit the form to your backend
+            }
+        });
+    </script>
+</body>
+</html>
