@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade - PDF-render.js</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="https://pdf-renderjs.pages.dev/" class="flex items-center gap-2.5">
+                    <div class="relative w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-md">
+                        <i class="fa-solid fa-file-pdf text-white text-sm"></i>
+                    </div>
+                    <span class="text-lg font-extrabold tracking-tight text-slate-950">PDF-render<span class="text-emerald-600">.js</span></span>
+                </a>
+                <div class="flex items-center gap-4">
+                    <a href="https://pdf-renderjs.pages.dev/app.html" class="text-slate-600 hover:text-slate-900 font-medium text-sm">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-4">
+                Upgrade Your Plan
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+                Choose the perfect plan for your PDF rendering needs
+            </p>
+        </div>
+    </div>
+
+    <!-- Pricing Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Basic Plan -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Basic</h3>
+                    <p class="text-slate-600 text-sm mb-4">For personal projects</p>
+                    <div class="text-4xl font-extrabold text-slate-900">
+                        Free
+                    </div>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>10 PDF renders/month</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Basic PDF hosting</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Community support</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-400 text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                        <span>API access</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-400 text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                        <span>Custom branding</span>
+                    </li>
+                </ul>
+                <button class="w-full bg-slate-100 text-slate-700 font-bold py-3 rounded-lg text-sm cursor-default">
+                    Current Plan
+                </button>
+            </div>
+
+            <!-- Standard Plan -->
+            <div class="bg-white border-2 border-emerald-500 rounded-2xl p-8 shadow-lg relative">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        POPULAR
+                    </span>
+                </div>
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Standard</h3>
+                    <p class="text-slate-600 text-sm mb-4">For growing businesses</p>
+                    <div class="text-4xl font-extrabold text-slate-900">
+                        $19<span class="text-lg font-normal text-slate-600">/month</span>
+                    </div>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>100 PDF renders/month</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Advanced PDF hosting</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>API access</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Email support</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-400 text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                        <span>Custom branding</span>
+                    </li>
+                </ul>
+                <button class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition-all">
+                    Upgrade to Standard
+                </button>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Pro</h3>
+                    <p class="text-slate-600 text-sm mb-4">For large organizations</p>
+                    <div class="text-4xl font-extrabold text-slate-900">
+                        $49<span class="text-lg font-normal text-slate-600">/month</span>
+                    </div>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Unlimited PDF renders</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Premium PDF hosting</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>API access</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Priority support</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 text-sm">
+                        <i class="fa-solid fa-check text-emerald-600"></i>
+                        <span>Custom branding</span>
+                    </li>
+                </ul>
+                <button class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition-all">
+                    Upgrade to Pro
+                </button>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="mt-16">
+            <h2 class="text-2xl font-bold text-slate-900 text-center mb-8">
+                Why Upgrade?
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-bolt text-emerald-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Faster Rendering</h3>
+                    <p class="text-slate-600 text-sm">
+                        Get your PDFs rendered in seconds with our optimized infrastructure
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-cloud text-emerald-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-2">More Storage</h3>
+                    <p class="text-slate-600 text-sm">
+                        Store unlimited PDFs with our premium hosting solution
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-headset text-emerald-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Priority Support</h3>
+                    <p class="text-slate-600 text-sm">
+                        Get help when you need it with our dedicated support team
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-slate-600 text-sm">
+                © 2024 PDF-render.js. All rights reserved.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
