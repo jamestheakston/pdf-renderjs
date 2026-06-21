@@ -215,7 +215,7 @@
                                     <h3 class="text-lg font-semibold text-slate-900 mb-2">Add PDF-render.js to your Wix site</h3>
                                     <p class="text-slate-600 text-sm mb-3">Go to your Wix editor and add a new HTML element to your page.</p>
                                     <div class="code-block">
-                                        <code>&lt;script src="https://your-domain.com/pdf-render.js"&gt;&lt;/script&gt;</code>
+                                        <code>&lt;script src="https://pdf-renderjs.pages.dev/pdf-render.js"&gt;&lt;/script&gt;</code>
                                     </div>
                                 </div>
                             </div>
@@ -267,7 +267,7 @@ renderer.loadDocument('your-pdf-url.pdf')
                                     <h3 class="text-lg font-semibold text-slate-900 mb-2">Enable Code Injection</h3>
                                     <p class="text-slate-600 text-sm mb-3">Go to Settings > Advanced > Code Injection and add the PDF-render.js script to the header.</p>
                                     <div class="code-block">
-                                        <code>&lt;script src="https://your-domain.com/pdf-render.js"&gt;&lt;/script&gt;</code>
+                                        <code>&lt;script src="https://pdf-renderjs.pages.dev/pdf-render.js"&gt;&lt;/script&gt;</code>
                                     </div>
                                 </div>
                             </div>
@@ -319,7 +319,7 @@ renderer.loadDocument('your-pdf-url.pdf')
                                     <h3 class="text-lg font-semibold text-slate-900 mb-2">Install PDF-render.js</h3>
                                     <p class="text-slate-600 text-sm mb-3">Add the PDF-render.js script to your WordPress site's header using a plugin like "Insert Headers and Footers".</p>
                                     <div class="code-block">
-                                        <code>&lt;script src="https://your-domain.com/pdf-render.js"&gt;&lt;/script&gt;</code>
+                                        <code>&lt;script src="https://pdf-renderjs.pages.dev/pdf-render.js"&gt;&lt;/script&gt;</code>
                                     </div>
                                 </div>
                             </div>
@@ -612,21 +612,23 @@ renderer.renderPage(1);</code>
         }
 
         // Sidebar navigation
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const text = link.textContent.trim();
-                
-                if (text === 'Dashboard') {
-                    showSection('dashboardContent');
-                    link.classList.add('active');
-                } else if (text === 'My PDFs') {
-                    showSection('mypdfsContent');
-                    link.classList.add('active');
-                } else if (text === 'Settings') {
-                    showSection('settingsContent');
-                    link.classList.add('active');
-                }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const text = link.textContent.trim();
+                    
+                    if (text === 'Dashboard') {
+                        showSection('dashboardContent');
+                        link.classList.add('active');
+                    } else if (text === 'My PDFs') {
+                        showSection('mypdfsContent');
+                        link.classList.add('active');
+                    } else if (text === 'Settings') {
+                        showSection('settingsContent');
+                        link.classList.add('active');
+                    }
+                });
             });
         });
 
