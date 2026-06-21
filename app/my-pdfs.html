@@ -223,7 +223,7 @@
                 // Upload to Supabase Storage
                 const { data, error } = await SupabaseClient
                     .storage
-                    .from('PDF Hosting')
+                    .from('pdf-hosting')
                     .upload(fileName, file, {
                         cacheControl: '3600',
                         upsert: false
@@ -236,7 +236,7 @@
                 // Get public URL
                 const { data: { publicUrl } } = SupabaseClient
                     .storage
-                    .from('PDF Hosting')
+                    .from('pdf-hosting')
                     .getPublicUrl(fileName);
 
                 // Update progress to 100%
