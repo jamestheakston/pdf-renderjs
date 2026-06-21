@@ -83,13 +83,16 @@
                         <i class="fa-solid fa-user text-emerald-600"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-semibold text-slate-900">John Doe</p>
+                        <p class="text-sm font-semibold text-slate-900" id="userEmail">Loading...</p>
                         <p class="text-xs text-slate-500">Basic Plan</p>
                     </div>
                 </div>
-                <a href="https://pdf-renderjs.pages.dev/signup.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+                <a href="https://pdf-renderjs.pages.dev/upgrade.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                     Upgrade to Pro
                 </a>
+                <button onclick="logout()" class="text-sm text-slate-500 hover:text-slate-700 font-medium mt-2">
+                    Logout
+                </button>
             </div>
         </aside>
 
@@ -106,7 +109,7 @@
                         <button class="text-slate-500 hover:text-slate-700">
                             <i class="fa-solid fa-bell text-xl"></i>
                         </button>
-                        <a href="https://pdf-renderjs.pages.dev/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                        <a href="https://pdf-renderjs.pages.dev/upgrade.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
                             Upgrade Plan
                         </a>
                     </div>
@@ -141,6 +144,20 @@
                                         <span>Public URLs for easy sharing</span>
                                     </li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Input Section -->
+                    <div id="emailInputSection" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-envelope text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-2">Email for Notifications</h3>
+                                <p class="text-slate-600 text-sm mb-3">We will send you further information about your file. Don't worry, we won't use it for any other purposes.</p>
+                                <input type="email" id="userEmailInput" placeholder="Enter your email address" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
                             </div>
                         </div>
                     </div>
@@ -209,12 +226,36 @@
             const percentageText = document.getElementById('uploadPercentage');
 
             try {
-                // Get current user
-                const { data: { user } } = await SupabaseClient.auth.getUser();
-                if (!user) {
+                // Get current user and session
+                const { data: { user }, error: userError } = await SupabaseClient.auth.getUser();
+                const { data: { session } } = await SupabaseClient.auth.getSession();
+                
+                if (!user || !session) {
                     alert('Please sign in to upload files.');
                     window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
                     return;
+                }
+
+                // Try to get email from user, session, or input
+                let userEmail = user.email || session.user.email;
+                const emailInput = document.getElementById('userEmailInput').value;
+                
+                if (emailInput && !userEmail) {
+                    // User provided email via input, update their profile
+                    userEmail = emailInput;
+                    try {
+                        await SupabaseClient.auth.updateUser({
+                            email: userEmail
+                        });
+                        console.log('User email updated in Supabase Auth');
+                    } catch (error) {
+                        console.error('Error updating user email:', error);
+                        // Still use the provided email for notification even if update fails
+                    }
+                }
+                
+                if (!userEmail) {
+                    console.warn('User email not available from GitHub OAuth or input');
                 }
 
                 // Generate unique filename
@@ -250,8 +291,12 @@
                 // Save file metadata to database
                 await saveFileToDatabase(user.id, file.name, fileName, publicUrl, file.size);
 
-                // Call edge function to send email notification
-                await sendUploadNotification(user.email, file.name, publicUrl, fileName);
+                // Call edge function to send email notification (only if email is available)
+                if (userEmail) {
+                    await sendUploadNotification(userEmail, file.name, publicUrl, fileName);
+                } else {
+                    console.warn('User email not available, skipping email notification');
+                }
 
                 // Hide progress after a delay
                 setTimeout(() => {
@@ -393,6 +438,11 @@
 
         async function sendUploadNotification(userEmail, fileName, publicUrl, storagePath) {
             try {
+                if (!userEmail) {
+                    console.warn('No email provided for notification');
+                    return;
+                }
+
                 // Initialize EmailJS with your service ID
                 emailjs.init("j48XCiKkkxnAesqeE");
                 
@@ -419,6 +469,15 @@
             }
         }
 
+        async function logout() {
+            try {
+                await SupabaseClient.auth.signOut();
+                window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
         // Check authentication on page load
         async function checkAuth() {
             try {
@@ -429,6 +488,9 @@
                 } else {
                     // Load user files after authentication
                     loadUserFiles();
+                    
+                    // Display user email
+                    document.getElementById('userEmail').textContent = session.user.email;
                 }
             } catch (error) {
                 console.error('Error checking auth:', error);
