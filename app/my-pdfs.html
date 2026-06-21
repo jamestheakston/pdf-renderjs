@@ -6,6 +6,7 @@
     <title>My PDFs - PDF-render.js</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -244,7 +245,10 @@
                 percentageText.textContent = '100%';
 
                 // Add to uploaded files list
-                addUploadedFile(file.name, publicUrl);
+                addUploadedFile(file.name, publicUrl, fileName);
+
+                // Save file metadata to database
+                await saveFileToDatabase(user.id, file.name, fileName, publicUrl, file.size);
 
                 // Call edge function to send email notification
                 await sendUploadNotification(user.email, file.name, publicUrl, fileName);
@@ -263,11 +267,12 @@
             }
         }
 
-        function addUploadedFile(fileName, publicUrl) {
+        function addUploadedFile(fileName, publicUrl, storagePath) {
             const uploadedFilesDiv = document.getElementById('uploadedFiles');
             
             const fileCard = document.createElement('div');
             fileCard.className = 'bg-slate-50 border border-slate-200 rounded-lg p-4';
+            fileCard.dataset.storagePath = storagePath;
             fileCard.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -284,7 +289,7 @@
                             <i class="fa-solid fa-copy mr-1"></i>
                             Copy URL
                         </button>
-                        <button onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-700 text-sm font-medium">
+                        <button onclick="deleteFile('${storagePath}', this)" class="text-red-600 hover:text-red-700 text-sm font-medium">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -302,26 +307,112 @@
             });
         }
 
+        async function saveFileToDatabase(userId, fileName, storagePath, publicUrl, fileSize) {
+            try {
+                const { error } = await SupabaseClient
+                    .from('user_files')
+                    .insert({
+                        user_id: userId,
+                        file_name: fileName,
+                        storage_path: storagePath,
+                        public_url: publicUrl,
+                        file_size: fileSize
+                    });
+
+                if (error) {
+                    console.error('Error saving file to database:', error);
+                }
+            } catch (error) {
+                console.error('Error saving file to database:', error);
+            }
+        }
+
+        async function loadUserFiles() {
+            try {
+                const { data: { user } } = await SupabaseClient.auth.getUser();
+                if (!user) return;
+
+                const { data: files, error } = await SupabaseClient
+                    .from('user_files')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Error loading files:', error);
+                    return;
+                }
+
+                const uploadedFilesDiv = document.getElementById('uploadedFiles');
+                uploadedFilesDiv.innerHTML = '';
+
+                files.forEach(file => {
+                    addUploadedFile(file.file_name, file.public_url, file.storage_path);
+                });
+            } catch (error) {
+                console.error('Error loading files:', error);
+            }
+        }
+
+        async function deleteFile(storagePath, button) {
+            if (!confirm('Are you sure you want to delete this file?')) {
+                return;
+            }
+
+            try {
+                // Delete from Supabase Storage
+                const { error: storageError } = await SupabaseClient
+                    .storage
+                    .from('pdf-hosting')
+                    .remove([storagePath]);
+
+                if (storageError) {
+                    console.error('Error deleting from storage:', storageError);
+                    alert('Error deleting file from storage');
+                    return;
+                }
+
+                // Delete from database
+                const { error: dbError } = await SupabaseClient
+                    .from('user_files')
+                    .delete()
+                    .eq('storage_path', storagePath);
+
+                if (dbError) {
+                    console.error('Error deleting from database:', dbError);
+                }
+
+                // Remove from UI
+                button.closest('.bg-slate-50').remove();
+                alert('File deleted successfully');
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                alert('Error deleting file');
+            }
+        }
+
         async function sendUploadNotification(userEmail, fileName, publicUrl, storagePath) {
             try {
-                const response = await fetch('https://biixliljqnnbfznxbtci.supabase.co/functions/v1/sendemailafterupload', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer sb_publishable_n1kfuQkqv5ZRFgTBhpRtnQ_5qLPSjcT`
-                    },
-                    body: JSON.stringify({
-                        userEmail,
-                        fileName,
-                        publicUrl,
-                        storagePath
-                    }),
-                });
+                // Initialize EmailJS with your service ID
+                emailjs.init("j48XCiKkkxnAesqeE");
+                
+                const templateParams = {
+                    to_email: userEmail,
+                    file_name: fileName,
+                    public_url: publicUrl,
+                    storage_path: storagePath
+                };
 
-                if (!response.ok) {
-                    console.error('Failed to send email notification:', await response.text());
-                } else {
+                const response = await emailjs.send(
+                    "service_yn3gq3m", 
+                    "template_cio03bg", 
+                    templateParams
+                );
+
+                if (response.status === 200) {
                     console.log('Email notification sent successfully');
+                } else {
+                    console.error('Failed to send email notification:', response);
                 }
             } catch (error) {
                 console.error('Error sending email notification:', error);
@@ -335,6 +426,9 @@
                 
                 if (!session) {
                     window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
+                } else {
+                    // Load user files after authentication
+                    loadUserFiles();
                 }
             } catch (error) {
                 console.error('Error checking auth:', error);
@@ -348,4 +442,3 @@
 
 </body>
 </html>
- 
