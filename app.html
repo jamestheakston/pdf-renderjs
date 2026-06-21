@@ -124,13 +124,16 @@
                         <i class="fa-solid fa-user text-emerald-600"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-semibold text-slate-900">John Doe</p>
+                        <p class="text-sm font-semibold text-slate-900" id="userEmail">Loading...</p>
                         <p class="text-xs text-slate-500">Basic Plan</p>
                     </div>
                 </div>
-                <a href="https://pdf-renderjs.pages.dev/signup.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+                <a href="https://pdf-renderjs.pages.dev/upgrade.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                     Upgrade to Pro
                 </a>
+                <button onclick="logout()" class="text-sm text-slate-500 hover:text-slate-700 font-medium mt-2">
+                    Logout
+                </button>
             </div>
         </aside>
 
@@ -147,7 +150,7 @@
                         <button class="text-slate-500 hover:text-slate-700">
                             <i class="fa-solid fa-bell text-xl"></i>
                         </button>
-                        <a href="https://pdf-renderjs.pages.dev/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                        <a href="https://pdf-renderjs.pages.dev/upgrade.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
                             Upgrade Plan
                         </a>
                     </div>
@@ -176,7 +179,7 @@
                                     <p class="text-slate-500 font-medium">No API key available on the basic plan</p>
                                     <p class="text-slate-400 text-sm mt-1">Upgrade to Standard or Pro to access API features</p>
                                 </div>
-                                <a href="https://pdf-renderjs.pages.dev/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                                <a href="https://pdf-renderjs.pages.dev/upgrade.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
                                     Upgrade Now
                                 </a>
                             </div>
@@ -497,6 +500,15 @@ renderer.renderPage(1);</code>
             document.getElementById(tabName + 'Tab').classList.add('active');
         }
 
+        async function logout() {
+            try {
+                await SupabaseClient.auth.signOut();
+                window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
         // Check authentication on page load
         async function checkAuth() {
             try {
@@ -504,6 +516,9 @@ renderer.renderPage(1);</code>
                 
                 if (!session) {
                     window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
+                } else {
+                    // Display user email
+                    document.getElementById('userEmail').textContent = session.user.email;
                 }
             } catch (error) {
                 console.error('Error checking auth:', error);
