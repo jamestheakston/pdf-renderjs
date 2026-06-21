@@ -157,7 +157,7 @@
                             <div class="flex-1">
                                 <h3 class="text-lg font-semibold text-slate-900 mb-2">Email for Notifications</h3>
                                 <p class="text-slate-600 text-sm mb-3">We will send you further information about your file. Don't worry, we won't use it for any other purposes.</p>
-                                <input type="email" id="userEmailInput" placeholder="Enter your email address" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
+                                <input type="email" id="userEmailInput" placeholder="Enter your email address (required)" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
                             </div>
                         </div>
                     </div>
@@ -225,6 +225,14 @@
             const progressBar = document.getElementById('uploadProgressBar');
             const percentageText = document.getElementById('uploadPercentage');
 
+            // Validate email input
+            const emailInput = document.getElementById('userEmailInput').value;
+            if (!emailInput || !emailInput.includes('@')) {
+                alert('Please provide a valid email address to receive notifications about your file.');
+                document.getElementById('uploadProgress').classList.add('hidden');
+                return;
+            }
+
             try {
                 // Get current user and session
                 const { data: { user }, error: userError } = await SupabaseClient.auth.getUser();
@@ -240,6 +248,9 @@
                 let userEmail = user.email || session.user.email;
                 const emailInput = document.getElementById('userEmailInput').value;
                 
+                console.log('User email from auth:', userEmail);
+                console.log('Email input value:', emailInput);
+                
                 if (emailInput && !userEmail) {
                     // User provided email via input, update their profile
                     userEmail = emailInput;
@@ -247,16 +258,24 @@
                         await SupabaseClient.auth.updateUser({
                             email: userEmail
                         });
-                        console.log('User email updated in Supabase Auth');
+                        console.log('User email updated in Supabase Auth:', userEmail);
                     } catch (error) {
                         console.error('Error updating user email:', error);
                         // Still use the provided email for notification even if update fails
                     }
+                } else if (emailInput) {
+                    // User provided email even though they have one, use the input
+                    userEmail = emailInput;
+                    console.log('Using email input instead of auth email:', userEmail);
                 }
                 
                 if (!userEmail) {
                     console.warn('User email not available from GitHub OAuth or input');
+                    alert('Please provide an email address to receive notifications about your file.');
+                    return;
                 }
+                
+                console.log('Final email to use for notification:', userEmail);
 
                 // Generate unique filename
                 const fileExt = file.name.split('.').pop();
@@ -438,6 +457,8 @@
 
         async function sendUploadNotification(userEmail, fileName, publicUrl, storagePath) {
             try {
+                console.log('sendUploadNotification called with:', { userEmail, fileName, publicUrl, storagePath });
+                
                 if (!userEmail) {
                     console.warn('No email provided for notification');
                     return;
@@ -452,12 +473,16 @@
                     public_url: publicUrl,
                     storage_path: storagePath
                 };
+                
+                console.log('Sending EmailJS with templateParams:', templateParams);
 
                 const response = await emailjs.send(
                     "service_yn3gq3m", 
                     "template_cio03bg", 
                     templateParams
                 );
+
+                console.log('EmailJS response:', response);
 
                 if (response.status === 200) {
                     console.log('Email notification sent successfully');
