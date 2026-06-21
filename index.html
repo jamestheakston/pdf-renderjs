@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF-render.js - Fast, Client-Side PDF Rendering with Annotations</title>
+    <title>PDF-render.js - Modern PDF Rendering</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -31,314 +31,228 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
-            overflow-x: hidden;
+            background-color: #0f172a;
+            color: #ffffff;
         }
-
-        .hero-gradient {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f8fafc 100%);
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-
-        .floating-animation {
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .hero-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+        }
+        
+        .animate-float {
             animation: float 6s ease-in-out infinite;
         }
-
+        
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
         }
-
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
-        }
-
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        
+        .code-block {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body class="antialiased selection:bg-emerald-100 selection:text-emerald-900">
-
-    <header class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all duration-300">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<body class="antialiased min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="#" class="flex items-center gap-2.5 group">
-                    <div class="relative w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-md group-hover:scale-105 transition-transform">
+                <a href="https://pdf-renderjs.pages.dev/" class="flex items-center gap-2.5">
+                    <div class="relative w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-cyan-500 shadow-lg">
                         <i class="fa-solid fa-file-pdf text-white text-sm"></i>
                     </div>
-                    <span class="text-lg font-extrabold tracking-tight text-slate-950">PDF-render<span class="text-emerald-600">.js</span></span>
+                    <span class="text-lg font-extrabold tracking-tight text-white">PDF-render<span class="text-emerald-400">.js</span></span>
                 </a>
-
                 <div class="flex items-center gap-4">
-                    <a href="https://github.com" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 text-xs bg-white hover:bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 transition-all shadow-sm">
-                        <i class="fa-brands fa-github text-slate-900"></i>
-                        <span>GitHub</span>
+                    <a href="https://pdf-renderjs.pages.dev/demo.html" class="text-slate-300 hover:text-white font-medium text-sm transition-colors">
+                        Demo
                     </a>
-                    <a href="/signup?pricingchosen=false" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-1.5 rounded-lg transition-all shadow-sm shadow-emerald-600/10">
+                    <a href="https://pdf-renderjs.pages.dev/login.html" class="text-slate-300 hover:text-white font-medium text-sm transition-colors">
+                        Login
+                    </a>
+                    <a href="https://pdf-renderjs.pages.dev/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-4 py-2 rounded-lg transition-all shadow-lg shadow-emerald-600/20">
                         Get Started
                     </a>
                 </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <section class="relative pt-40 pb-24 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center hero-gradient">
-        <!-- Decorative background elements -->
-        <div class="absolute top-20 left-10 w-72 h-72 bg-emerald-200/30 rounded-full blur-3xl pulse-glow"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl pulse-glow" style="animation-delay: 1s;"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/20 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 mb-8 floating-animation">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs font-semibold text-emerald-700 tracking-wide uppercase">v1.0.0 Stable</span>
-            </div>
-
-            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight mb-6">
-                Render PDFs in the browser with <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">zero lag</span>
-            </h1>
-
-            <p class="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-                A small, dependencies-free Javascript renderer. Built solely to display PDF documents with full, high-fidelity interactive annotation support.
-            </p>
-
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto mb-20">
-                <a href="/signup?pricingchosen=false" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-4 rounded-xl transition-all text-base shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
-                    Get Started Free
-                </a>
-                <a href="https://github.com" target="_blank" class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-xl transition-all text-base shadow-sm hover:shadow-md">
-                    <i class="fa-brands fa-github mr-2"></i>
-                    View on GitHub
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-left">
-                <div class="bg-white/80 backdrop-blur-sm border border-slate-200/60 p-8 rounded-2xl shadow-sm card-hover">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-bolt text-lg"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-3">Dedicated PDF Rendering</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Runs entirely in client memory. Optimized solely for viewing and display with zero server rendering overhead.</p>
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center hero-glow pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-semibold text-emerald-400 tracking-wide uppercase">v1.0.0 Now Available</span>
                 </div>
-
-                <div class="bg-white/80 backdrop-blur-sm border border-slate-200/60 p-8 rounded-2xl shadow-sm card-hover">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 text-white flex items-center justify-center mb-5 shadow-lg shadow-teal-500/20">
-                        <i class="fa-solid fa-pen-nib text-lg"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-3">Full Annotations</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Supports real-time highlighting, text highlights, digital signatures, and custom graphical markups seamlessly.</p>
+                
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+                    Render PDFs with <span class="gradient-text">lightning speed</span>
+                </h1>
+                
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    A lightweight, dependency-free JavaScript library for rendering PDFs with full annotation support. Built for modern web applications.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                    <a href="https://pdf-renderjs.pages.dev/signup.html" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-4 rounded-xl transition-all text-base shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
+                        Start Free Trial
+                    </a>
+                    <a href="https://pdf-renderjs.pages.dev/demo.html" class="w-full sm:w-auto glass-card hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-xl transition-all text-base">
+                        <i class="fa-solid fa-play mr-2"></i>
+                        View Demo
+                    </a>
                 </div>
-
-                <div class="bg-white/80 backdrop-blur-sm border border-slate-200/60 p-8 rounded-2xl shadow-sm card-hover">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 text-white flex items-center justify-center mb-5 shadow-lg shadow-cyan-500/20">
-                        <i class="fa-solid fa-weight-hanging text-lg"></i>
+                
+                <!-- Code Preview -->
+                <div class="code-block rounded-2xl p-6 max-w-2xl mx-auto text-left">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-3">Compact Library</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Under 12KB gzipped. Pure modern client-side Javascript with no complex server environments required.</p>
+                    <pre class="text-sm text-slate-300 overflow-x-auto"><code><span class="text-purple-400">&lt;script</span> <span class="text-cyan-400">src</span>=<span class="text-emerald-400">"https://pdf-renderjs.pages.dev/pdf-render.js"</span><span class="text-purple-400">&gt;&lt;/script&gt;</span>
+<span class="text-slate-500">// Initialize the renderer</span>
+<span class="text-purple-400">const</span> renderer = <span class="text-purple-400">new</span> PDFRenderer(<span class="text-emerald-400">'#pdf-container'</span>);
+renderer.load(<span class="text-emerald-400">'your-document.pdf'</span>);</code></pre>
                 </div>
             </div>
         </div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-1/4 left-10 w-20 h-20 rounded-full bg-emerald-500/20 blur-xl animate-float"></div>
+        <div class="absolute bottom-1/4 right-10 w-32 h-32 rounded-full bg-cyan-500/20 blur-xl animate-float" style="animation-delay: 2s;"></div>
     </section>
 
-    <section class="py-24 bg-white border-t border-slate-100">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Features Section -->
+    <section class="py-24 bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 mb-6">
-                    <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-                    <span class="text-xs font-semibold text-emerald-700 tracking-wide uppercase">Use Cases</span>
-                </div>
-                <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Power your applications</h2>
-                <p class="text-slate-600 text-lg max-w-2xl mx-auto">Fast, client-side PDF rendering and annotations for any use case</p>
+                <h2 class="text-4xl font-extrabold text-white mb-4">Why choose PDF-render.js?</h2>
+                <p class="text-slate-400 text-lg max-w-2xl mx-auto">Built for performance, designed for developers</p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Document Signing -->
-                <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden card-hover group">
-                    <div class="h-56 bg-slate-100 overflow-hidden relative">
-                        <img src="https://platform.theverge.com/wp-content/uploads/sites/2/chorus/assets/1051898/Adobe-Reader-EchoSign-iPad-Ink_Signature_Tool.png?quality=90&strip=all&crop=0,5.5555555555556,100,88.888888888889" alt="Document Signing" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card rounded-2xl p-8 hover:bg-white/10 transition-all">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-bolt text-2xl text-white"></i>
                     </div>
-                    <div class="p-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-signature text-lg"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Document Signing</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Enable digital signatures directly in your web application. Users can sign documents with ink signatures, stamps, or typed signatures.</p>
-                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Lightning Fast</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Optimized for speed with minimal overhead. Renders PDFs in milliseconds, not seconds.</p>
                 </div>
-
-                <!-- Form Filling -->
-                <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden card-hover group">
-                    <div class="h-56 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-teal-500/10"></div>
-                        <div class="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-file-lines text-3xl text-emerald-600"></i>
-                        </div>
+                
+                <div class="glass-card rounded-2xl p-8 hover:bg-white/10 transition-all">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/20">
+                        <i class="fa-solid fa-feather text-2xl text-white"></i>
                     </div>
-                    <div class="p-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-clipboard-list text-lg"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Form Filling</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Interactive form fields that users can fill out directly in the browser. Supports text inputs, checkboxes, radio buttons, and more.</p>
-                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Zero Dependencies</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Under 12KB gzipped. No external libraries required. Pure vanilla JavaScript.</p>
                 </div>
-
-                <!-- Contract Review -->
-                <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden card-hover group">
-                    <div class="h-56 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10"></div>
-                        <div class="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-magnifying-glass text-3xl text-blue-600"></i>
-                        </div>
+                
+                <div class="glass-card rounded-2xl p-8 hover:bg-white/10 transition-all">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
+                        <i class="fa-solid fa-pen-nib text-2xl text-white"></i>
                     </div>
-                    <div class="p-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-scale-balanced text-lg"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Contract Review</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Highlight and annotate contracts for legal review. Add comments, markups, and collaborate with team members in real-time.</p>
-                    </div>
-                </div>
-
-                <!-- Educational Materials -->
-                <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden card-hover group">
-                    <div class="h-56 bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10"></div>
-                        <div class="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-graduation-cap text-3xl text-purple-600"></i>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-book-open text-lg"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Educational Materials</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Display textbooks, course materials, and study guides. Students can highlight key passages and add notes for learning.</p>
-                    </div>
-                </div>
-
-                <!-- Invoice Processing -->
-                <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden card-hover group">
-                    <div class="h-56 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10"></div>
-                        <div class="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-receipt text-3xl text-amber-600"></i>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-invoice-dollar text-lg"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Invoice Processing</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Review and annotate invoices directly in your accounting system. Mark up discrepancies and add approval notes.</p>
-                    </div>
-                </div>
-
-                <!-- Technical Documentation -->
-                <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden card-hover group">
-                    <div class="h-56 bg-gradient-to-br from-cyan-100 to-sky-100 flex items-center justify-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-sky-500/10"></div>
-                        <div class="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-code text-3xl text-cyan-600"></i>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-laptop-code text-lg"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Technical Documentation</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Display API docs, user manuals, and technical specifications. Developers can annotate and share feedback on documentation.</p>
-                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Full Annotations</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Support for highlighting, signatures, comments, and custom markups out of the box.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="get-started" class="py-24 bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-t border-slate-100 text-center relative overflow-hidden">
-        <!-- Decorative elements -->
-        <div class="absolute top-0 left-0 w-64 h-64 bg-emerald-100/30 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-0 w-96 h-96 bg-teal-100/30 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10 max-w-3xl mx-auto px-4">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border border-emerald-200 mb-8">
-                <i class="fa-solid fa-rocket text-emerald-600"></i>
-                <span class="text-xs font-semibold text-emerald-700 tracking-wide uppercase">Ready to get started?</span>
+    <!-- Integration Section -->
+    <section class="py-24 bg-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-extrabold text-white mb-4">Works everywhere</h2>
+                <p class="text-slate-400 text-lg max-w-2xl mx-auto">Integrate with any platform in minutes</p>
             </div>
+            
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="glass-card rounded-xl p-6 text-center hover:bg-white/10 transition-all">
+                    <i class="fa-brands fa-react text-4xl text-cyan-400 mb-4"></i>
+                    <h3 class="text-white font-semibold mb-1">React</h3>
+                    <p class="text-slate-400 text-xs">Full support</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center hover:bg-white/10 transition-all">
+                    <i class="fa-brands fa-vuejs text-4xl text-emerald-400 mb-4"></i>
+                    <h3 class="text-white font-semibold mb-1">Vue.js</h3>
+                    <p class="text-slate-400 text-xs">Full support</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center hover:bg-white/10 transition-all">
+                    <i class="fa-brands fa-wordpress text-4xl text-blue-400 mb-4"></i>
+                    <h3 class="text-white font-semibold mb-1">WordPress</h3>
+                    <p class="text-slate-400 text-xs">Plugin available</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-globe text-4xl text-purple-400 mb-4"></i>
+                    <h3 class="text-white font-semibold mb-1">Vanilla JS</h3>
+                    <p class="text-slate-400 text-xs">Native support</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <h2 class="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
-                Start rendering PDFs today
-            </h2>
-
-            <p class="text-lg text-slate-600 mb-10 max-w-2xl mx-auto">
-                Launch the standalone rendering host directly to view and annotate your PDF documents. No server setup required.
+    <!-- CTA Section -->
+    <section class="py-24 bg-gradient-to-br from-emerald-600 to-cyan-600">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-extrabold text-white mb-6">Ready to get started?</h2>
+            <p class="text-xl text-emerald-100 mb-10 max-w-2xl mx-auto">
+                Join thousands of developers using PDF-render.js to power their applications
             </p>
-
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-                <a href="/signup?pricingchosen=false" class="inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-4 rounded-xl transition-all text-base shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
-                    <i class="fa-solid fa-rocket mr-2"></i>
-                    Get Started Free
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://pdf-renderjs.pages.dev/signup.html" class="w-full sm:w-auto bg-white text-emerald-600 font-bold px-8 py-4 rounded-xl transition-all text-base shadow-lg hover:shadow-xl">
+                    Start Free Trial
                 </a>
-                <a href="https://github.com" target="_blank" class="inline-flex items-center justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-xl transition-all text-base shadow-sm hover:shadow-md">
-                    <i class="fa-brands fa-github mr-2"></i>
-                    View Documentation
+                <a href="https://pdf-renderjs.pages.dev/demo.html" class="w-full sm:w-auto bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-xl transition-all text-base hover:bg-white/10">
+                    View Demo
                 </a>
-            </div>
-
-            <div class="flex items-center justify-center gap-8 text-sm text-slate-500">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                    <span>MIT License</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                    <span>Open Source</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                    <span>Zero Dependencies</span>
-                </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-12 border-t border-slate-100 text-center text-sm text-slate-500 bg-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Footer -->
+    <footer class="py-12 bg-slate-900 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-md">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-cyan-500 shadow-lg">
                         <i class="fa-solid fa-file-pdf text-white text-sm"></i>
                     </div>
-                    <span class="font-bold text-slate-900">PDF-render<span class="text-emerald-600">.js</span></span>
+                    <span class="font-bold text-white">PDF-render<span class="text-emerald-400">.js</span></span>
                 </div>
                 <div class="flex items-center gap-6">
-                    <a href="https://github.com" target="_blank" class="text-slate-500 hover:text-slate-900 transition-colors">
-                        <i class="fa-brands fa-github text-xl"></i>
+                    <a href="https://pdf-renderjs.pages.dev/demo.html" class="text-slate-400 hover:text-white transition-colors text-sm">
+                        Demo
                     </a>
-                    <a href="#" class="text-slate-500 hover:text-slate-900 transition-colors">
-                        <i class="fa-brands fa-twitter text-xl"></i>
+                    <a href="https://pdf-renderjs.pages.dev/login.html" class="text-slate-400 hover:text-white transition-colors text-sm">
+                        Login
                     </a>
-                    <a href="#" class="text-slate-500 hover:text-slate-900 transition-colors">
-                        <i class="fa-brands fa-discord text-xl"></i>
+                    <a href="https://pdf-renderjs.pages.dev/signup.html" class="text-slate-400 hover:text-white transition-colors text-sm">
+                        Sign Up
                     </a>
                 </div>
             </div>
-            <div class="mt-8 pt-8 border-t border-slate-100">
+            <div class="mt-8 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
                 <p>&copy; 2026 PDF-render.js. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
 </body>
 </html>
