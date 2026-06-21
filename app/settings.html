@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - PDF-render.js</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .sidebar-link.active {
+            background-color: #dcfce7;
+            color: #059669;
+            border-left: 3px solid #10b981;
+        }
+
+        .sidebar-link:hover:not(.active) {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200 fixed h-full">
+            <div class="p-6">
+                <a href="https://pdf-renderjs.pages.dev/app.html" class="flex items-center gap-2.5 group mb-8">
+                    <div class="relative w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-md">
+                        <i class="fa-solid fa-file-pdf text-white text-sm"></i>
+                    </div>
+                    <span class="text-lg font-extrabold tracking-tight text-slate-950">PDF-render<span class="text-emerald-600">.js</span></span>
+                </a>
+
+                <nav class="space-y-1">
+                    <a href="https://pdf-renderjs.pages.dev/app.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-home w-5"></i>
+                        Dashboard
+                    </a>
+                    <a href="https://pdf-renderjs.pages.dev/app/my-pdfs.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-file-pdf w-5"></i>
+                        My PDFs
+                    </a>
+                    <a href="https://pdf-renderjs.pages.dev/app/settings.html" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-gear w-5"></i>
+                        Settings
+                    </a>
+                </nav>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <i class="fa-solid fa-user text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-900">John Doe</p>
+                        <p class="text-xs text-slate-500">Basic Plan</p>
+                    </div>
+                </div>
+                <a href="https://pdf-renderjs.pages.dev/signup.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+                    Upgrade to Pro
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64">
+            <!-- Header -->
+            <header class="bg-white border-b border-slate-200 px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900">Settings</h1>
+                        <p class="text-slate-500 text-sm">Manage your account information and preferences</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 hover:text-slate-700">
+                            <i class="fa-solid fa-bell text-xl"></i>
+                        </button>
+                        <a href="https://pdf-renderjs.pages.dev/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                            Upgrade Plan
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="p-8">
+                <div class="bg-white border border-slate-200/60 rounded-xl shadow-sm p-6 mb-8">
+                    <h2 class="text-xl font-bold text-slate-900 mb-2">Account Settings</h2>
+                    <p class="text-slate-600 text-sm mb-6">Manage your account information and preferences</p>
+
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+                            <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+                                <i class="fa-solid fa-user text-emerald-600 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-slate-900">Profile Information</h3>
+                                <p class="text-slate-600 text-sm">Manage your GitHub profile information</p>
+                            </div>
+                            <button class="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <i class="fa-brands fa-github mr-1"></i>
+                                Connected via GitHub
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+                            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="fa-solid fa-credit-card text-blue-600 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-slate-900">Subscription</h3>
+                                <p class="text-slate-600 text-sm">Basic Plan - Free</p>
+                            </div>
+                            <a href="https://pdf-renderjs.pages.dev/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                                Upgrade
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="bg-white border border-red-200/60 rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold text-red-900 mb-2">Danger Zone</h2>
+                    <p class="text-red-600 text-sm mb-6">Irreversible and destructive actions</p>
+
+                    <div class="border border-red-200 rounded-lg p-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900 mb-1">Delete Account</h3>
+                                <p class="text-slate-600 text-sm mb-3">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                                <p class="text-slate-500 text-xs">Contact <a href="mailto:jamestheakston2@gmail.com" class="text-emerald-600 hover:text-emerald-700">jamestheakston2@gmail.com</a> to request account deletion</p>
+                            </div>
+                            <button disabled class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm disabled:bg-slate-300 disabled:cursor-not-allowed disabled:text-slate-500">
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SupabaseClient = supabase.createClient(
+            'https://biixliljqnnbfznxbtci.supabase.co',
+            'sb_publishable_n1kfuQkqv5ZRFgTBhpRtnQ_5qLPSjcT'
+        );
+
+        // Check authentication on page load
+        async function checkAuth() {
+            try {
+                const { data: { session } } = await SupabaseClient.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+                window.location.href = 'https://pdf-renderjs.pages.dev/login.html';
+            }
+        }
+
+        // Check authentication on page load
+        checkAuth();
+    </script>
+
+</body>
+</html>
