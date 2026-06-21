@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF-render.js Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="pdf-render.js"></script>
+    <style>
+        .pdf-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .pdf-page {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 100%;
+        }
+        .annotation-tool {
+            transition: all 0.2s ease;
+        }
+        .annotation-tool.active {
+            background-color: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">PDF-render.js Demo</h1>
+        
+        <!-- File Upload -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center gap-4">
+                <input type="file" id="pdfInput" accept=".pdf" class="flex-1 border border-gray-300 rounded-lg px-4 py-2">
+                <button onclick="loadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg">
+                    Load PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Annotation Tools -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Annotation Tools</h2>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="setAnnotationMode('highlight')" class="annotation-tool px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50" id="highlightBtn">
+                    <i class="fa-solid fa-highlighter mr-2"></i>Highlight
+                </button>
+                <button onclick="setAnnotationMode('text')" class="annotation-tool px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50" id="textBtn">
+                    <i class="fa-solid fa-comment mr-2"></i>Text
+                </button>
+                <button onclick="setAnnotationMode('signature')" class="annotation-tool px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50" id="signatureBtn">
+                    <i class="fa-solid fa-signature mr-2"></i>Signature
+                </button>
+                <button onclick="setAnnotationMode('draw')" class="annotation-tool px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50" id="drawBtn">
+                    <i class="fa-solid fa-pen mr-2"></i>Draw
+                </button>
+                <button onclick="clearAnnotations()" class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
+                    <i class="fa-solid fa-trash mr-2"></i>Clear All
+                </button>
+                <button onclick="exportAnnotations()" class="px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50">
+                    <i class="fa-solid fa-download mr-2"></i>Export
+                </button>
+            </div>
+        </div>
+
+        <!-- PDF Display -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div id="pdfContainer" class="pdf-container">
+                <p class="text-gray-500 text-center">Load a PDF to get started</p>
+            </div>
+        </div>
+
+        <!-- Page Navigation -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <div class="flex items-center justify-between">
+                <button onclick="prevPage()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>Previous
+                </button>
+                <span id="pageInfo" class="text-gray-700">Page 0 of 0</span>
+                <button onclick="nextPage()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
+                    Next<i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let renderer;
+        let currentPage = 1;
+        let totalPages = 0;
+        let currentAnnotationMode = null;
+        let drawingPoints = [];
+
+        async function loadPDF() {
+            const fileInput = document.getElementById('pdfInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a PDF file');
+                return;
+            }
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                
+                renderer = new PDFRenderer({
+                    scale: 1.5
+                });
+
+                const info = await renderer.loadDocument(arrayBuffer);
+                totalPages = info.numPages;
+                currentPage = 1;
+
+                document.getElementById('pdfContainer').innerHTML = '';
+                await renderer.renderAllPages(document.getElementById('pdfContainer'));
+
+                updatePageInfo();
+                setupAnnotationHandlers();
+                
+                console.log('PDF loaded successfully');
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('Error loading PDF: ' + error.message);
+            }
+        }
+
+        function updatePageInfo() {
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePageInfo();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePageInfo();
+            }
+        }
+
+        function setAnnotationMode(mode) {
+            currentAnnotationMode = mode;
+            
+            // Update button states
+            document.querySelectorAll('.annotation-tool').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const buttonId = mode + 'Btn';
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.classList.add('active');
+            }
+
+            if (mode === 'draw') {
+                drawingPoints = [];
+            }
+        }
+
+        function setupAnnotationHandlers() {
+            const container = document.getElementById('pdfContainer');
+            const canvases = container.querySelectorAll('canvas');
+
+            canvases.forEach((canvas, index) => {
+                const pageNum = index + 1;
+                const ctx = canvas.getContext('2d');
+
+                canvas.addEventListener('click', (e) => {
+                    if (!currentAnnotationMode) return;
+
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / renderer.scale;
+                    const y = (e.clientY - rect.top) / renderer.scale;
+
+                    switch (currentAnnotationMode) {
+                        case 'highlight':
+                            const highlightColor = prompt('Enter highlight color (hex):', '#ffff00') || '#ffff00';
+                            renderer.addHighlight(pageNum, {
+                                x: x - 50,
+                                y: y - 10,
+                                width: 100,
+                                height: 20
+                            }, highlightColor);
+                            renderer.renderPage(pageNum, canvas);
+                            break;
+
+                        case 'text':
+                            const text = prompt('Enter annotation text:');
+                            if (text) {
+                                const textColor = prompt('Enter text color (hex):', '#ff0000') || '#ff0000';
+                                renderer.addTextAnnotation(pageNum, { x, y }, text, textColor);
+                                renderer.renderPage(pageNum, canvas);
+                            }
+                            break;
+
+                        case 'signature':
+                            const signatureData = prompt('Enter signature image URL (or base64):');
+                            if (signatureData) {
+                                renderer.addSignature(pageNum, { x, y }, signatureData, 'image');
+                                renderer.renderPage(pageNum, canvas);
+                            }
+                            break;
+                    }
+                });
+
+                canvas.addEventListener('mousedown', (e) => {
+                    if (currentAnnotationMode === 'draw') {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / renderer.scale;
+                        const y = (e.clientY - rect.top) / renderer.scale;
+                        drawingPoints = [{ x, y }];
+                    }
+                });
+
+                canvas.addEventListener('mousemove', (e) => {
+                    if (currentAnnotationMode === 'draw' && drawingPoints.length > 0) {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / renderer.scale;
+                        const y = (e.clientY - rect.top) / renderer.scale;
+                        drawingPoints.push({ x, y });
+                        
+                        // Preview drawing
+                        renderer.renderPage(pageNum, canvas);
+                        renderer.addDrawing(pageNum, drawingPoints, '#ff0000', 2);
+                        renderer.renderAnnotations(canvas, pageNum);
+                        renderer.annotations.pop(); // Remove preview
+                    }
+                });
+
+                canvas.addEventListener('mouseup', () => {
+                    if (currentAnnotationMode === 'draw' && drawingPoints.length > 1) {
+                        renderer.addDrawing(pageNum, drawingPoints, '#ff0000', 2);
+                        renderer.renderPage(pageNum, canvas);
+                        drawingPoints = [];
+                    }
+                });
+            });
+        }
+
+        function clearAnnotations() {
+            if (renderer) {
+                renderer.clearAnnotations();
+                const container = document.getElementById('pdfContainer');
+                const canvases = container.querySelectorAll('canvas');
+                canvases.forEach((canvas, index) => {
+                    renderer.renderPage(index + 1, canvas);
+                });
+            }
+        }
+
+        function exportAnnotations() {
+            if (renderer) {
+                const annotations = renderer.exportAnnotations();
+                const blob = new Blob([annotations], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'annotations.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+    </script>
+</body>
+</html>

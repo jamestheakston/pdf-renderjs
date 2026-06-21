@@ -189,24 +189,27 @@
                 <h2 class="text-2xl font-bold text-emerald-700 mb-2" id="accountPlanName">Basic Plan</h2>
                 <div class="text-4xl font-extrabold text-slate-900" id="accountPlanPrice">Free</div>
             </div>
-            <form id="accountForm">
-                <div class="form-group mb-5">
-                    <label for="accountName" class="block mb-2 font-semibold text-slate-800">Full Name</label>
-                    <input type="text" id="accountName" name="name" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 transition-colors">
-                    <div class="error-message">Please enter your name</div>
+            
+            <div class="text-center mb-8">
+                <p class="text-slate-600 mb-6">Sign up with your GitHub account to get started</p>
+                <button onclick="signInWithGitHub()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all shadow-md flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-github text-2xl"></i>
+                    Continue with GitHub
+                </button>
+            </div>
+            
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-slate-200"></div>
                 </div>
-                <div class="form-group mb-5">
-                    <label for="accountEmail" class="block mb-2 font-semibold text-slate-800">Email Address</label>
-                    <input type="email" id="accountEmail" name="email" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 transition-colors">
-                    <div class="error-message">Please enter a valid email address</div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-slate-500">or</span>
                 </div>
-                <div class="form-group mb-5">
-                    <label for="accountPassword" class="block mb-2 font-semibold text-slate-800">Password</label>
-                    <input type="password" id="accountPassword" name="password" required minlength="8" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 transition-colors">
-                    <div class="error-message">Password must be at least 8 characters</div>
-                </div>
-                <button type="button" onclick="goToNextStep()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-lg transition-all shadow-md shadow-emerald-600/10">Next</button>
-            </form>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-slate-600 text-sm">Already have an account? <a href="/login.html" class="text-emerald-600 hover:text-emerald-700 font-medium">Sign in</a></p>
+            </div>
         </div>
 
         <!-- Payment Step (for Standard plan) -->
@@ -309,63 +312,68 @@
             updateProgressBar(4);
         }
 
-        async function goToNextStep() {
-            // Validate account form
-            const name = document.getElementById('accountName');
-            const email = document.getElementById('accountEmail');
-            const password = document.getElementById('accountPassword');
-            
-            let isValid = true;
-            
-            if (!name.value.trim()) {
-                name.classList.add('error');
-                isValid = false;
-            } else {
-                name.classList.remove('error');
-            }
-            
-            if (!email.value.trim() || !email.value.includes('@')) {
-                email.classList.add('error');
-                isValid = false;
-            } else {
-                email.classList.remove('error');
-            }
-            
-            if (password.value.length < 8) {
-                password.classList.add('error');
-                isValid = false;
-            } else {
-                password.classList.remove('error');
-            }
-            
-            if (isValid) {
-                try {
-                    // Sign up user with Supabase
-                    const { data, error } = await SupabaseClient.auth.signUp({
-                        email: email.value,
-                        password: password.value,
-                        options: {
-                            data: {
-                                full_name: name.value,
-                                plan: currentPlan
-                            }
+        async function signInWithGitHub() {
+            try {
+                const { data, error } = await SupabaseClient.auth.signInWithOAuth({
+                    provider: 'github',
+                    options: {
+                        redirectTo: `${window.location.origin}/signup.html?pricingchosen=${currentPlan}&oauth=true`,
+                        queryParams: {
+                            plan: currentPlan
                         }
-                    });
+                    }
+                });
+
+                if (error) {
+                    alert('Error signing in with GitHub: ' + error.message);
+                    return;
+                }
+            } catch (error) {
+                alert('Error signing in with GitHub: ' + error.message);
+            }
+        }
+
+        async function handleOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const oauth = urlParams.get('oauth');
+            const plan = urlParams.get('pricingchosen');
+
+            if (oauth === 'true') {
+                try {
+                    // Check if user is authenticated
+                    const { data: { session }, error } = await SupabaseClient.auth.getSession();
 
                     if (error) {
-                        alert('Error creating account: ' + error.message);
+                        console.error('Error getting session:', error);
+                        window.location.href = '/signup.html';
                         return;
                     }
 
-                    if (currentPlan === 'basic') {
-                        // Skip payment step for basic plan
-                        goToSuccessStep();
+                    if (session) {
+                        // Update user metadata with plan
+                        const { error: updateError } = await SupabaseClient.auth.updateUser({
+                            data: {
+                                plan: plan || 'basic'
+                            }
+                        });
+
+                        if (updateError) {
+                            console.error('Error updating user:', updateError);
+                        }
+
+                        currentPlan = plan || 'basic';
+
+                        if (currentPlan === 'basic') {
+                            goToSuccessStep();
+                        } else {
+                            goToPaymentStep();
+                        }
                     } else {
-                        // Go to payment step for standard plan
-                        goToPaymentStep();
+                        window.location.href = '/signup.html';
                     }
                 } catch (error) {
-                    alert('Error creating account: ' + error.message);
+                    console.error('Error handling OAuth callback:', error);
+                    window.location.href = '/signup.html';
                 }
             }
         }
@@ -374,6 +382,9 @@
         downgradeCheckbox.addEventListener('change', function() {
             paymentNextBtn.disabled = !this.checked;
         });
+
+        // Handle OAuth callback on page load
+        handleOAuthCallback();
 
         // Handle different states based on pricingchosen parameter
         if (!pricingChosen || pricingChosen === 'false') {

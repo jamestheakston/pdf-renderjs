@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PDF-render.js</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-btn.active {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .code-block code {
+            color: #e2e8f0;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link.active {
+            background-color: #dcfce7;
+            color: #059669;
+            border-left: 3px solid #10b981;
+        }
+
+        .sidebar-link:hover:not(.active) {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200 fixed h-full">
+            <div class="p-6">
+                <a href="/" class="flex items-center gap-2.5 group mb-8">
+                    <div class="relative w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-md">
+                        <i class="fa-solid fa-file-pdf text-white text-sm"></i>
+                    </div>
+                    <span class="text-lg font-extrabold tracking-tight text-slate-950">PDF-render<span class="text-emerald-600">.js</span></span>
+                </a>
+
+                <nav class="space-y-1">
+                    <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-home w-5"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-plug w-5"></i>
+                        Integrations
+                    </a>
+                    <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-file-pdf w-5"></i>
+                        My PDFs
+                    </a>
+                    <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-chart-line w-5"></i>
+                        Analytics
+                    </a>
+                    <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium transition-all">
+                        <i class="fa-solid fa-gear w-5"></i>
+                        Settings
+                    </a>
+                </nav>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <i class="fa-solid fa-user text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-900">John Doe</p>
+                        <p class="text-xs text-slate-500">Basic Plan</p>
+                    </div>
+                </div>
+                <a href="/signup.html" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+                    Upgrade to Pro
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64">
+            <!-- Header -->
+            <header class="bg-white border-b border-slate-200 px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+                        <p class="text-slate-500 text-sm">Manage your PDF rendering integration</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 hover:text-slate-700">
+                            <i class="fa-solid fa-bell text-xl"></i>
+                        </button>
+                        <a href="/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                            Upgrade Plan
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="p-8">
+                <!-- API Key Section -->
+                <div class="bg-white border border-slate-200/60 rounded-xl shadow-sm p-6 mb-8">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 mb-2">API Key</h2>
+                            <p class="text-slate-600 text-sm">Your API key for authenticating requests to the PDF rendering service</p>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+                            <span class="text-amber-700 text-sm font-medium">Basic Plan</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                <p class="text-slate-500 font-medium">No API key available on the basic plan</p>
+                                <p class="text-slate-400 text-sm mt-1">Upgrade to Standard or Pro to access API features</p>
+                            </div>
+                            <a href="/signup.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                                Upgrade Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Section -->
+                <div class="bg-white border border-slate-200/60 rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold text-slate-900 mb-2">Integration Guide</h2>
+                    <p class="text-slate-600 text-sm mb-6">Follow these steps to integrate PDF-render.js into your website</p>
+
+                    <!-- Platform Tabs -->
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button onclick="switchTab('wix')" class="tab-btn active px-4 py-2 border border-slate-200 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-all" id="wixTab">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Wix.com_website_logo.svg/3840px-Wix.com_website_logo.svg.png" alt="Wix" class="w-5 h-5 inline mr-2">
+                            Wix
+                        </button>
+                        <button onclick="switchTab('squarespace')" class="tab-btn px-4 py-2 border border-slate-200 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-all" id="squarespaceTab">
+                            <img src="https://cdn.freebiesupply.com/logos/large/2x/squarespace-logo-black-and-white.png" alt="Squarespace" class="w-5 h-5 inline mr-2">
+                            Squarespace
+                        </button>
+                        <button onclick="switchTab('elementor')" class="tab-btn px-4 py-2 border border-slate-200 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-all" id="elementorTab">
+                            <i class="fa-solid fa-cube text-pink-500 mr-2"></i>
+                            Elementor
+                        </button>
+                        <button onclick="switchTab('html')" class="tab-btn px-4 py-2 border border-slate-200 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-all" id="htmlTab">
+                            <i class="fa-solid fa-code text-blue-500 mr-2"></i>
+                            HTML
+                        </button>
+                    </div>
+
+                    <!-- Wix Integration -->
+                    <div id="wixContent" class="tab-content active">
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Add PDF-render.js to your Wix site</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Go to your Wix editor and add a new HTML element to your page.</p>
+                                    <div class="code-block">
+                                        <code>&lt;script src="https://your-domain.com/pdf-render.js"&gt;&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Create a canvas element</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add a canvas element where you want the PDF to be displayed.</p>
+                                    <div class="code-block">
+                                        <code>&lt;canvas id="pdfCanvas"&gt;&lt;/canvas&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Initialize the renderer</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add JavaScript code to initialize and render your PDF.</p>
+                                    <div class="code-block">
+                                        <code>const renderer = new PDFRenderer({
+  canvas: document.getElementById('pdfCanvas'),
+  scale: 1.5
+});
+
+renderer.loadDocument('your-pdf-url.pdf')
+  .then(() => renderer.renderPage(1));</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">4</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Test your integration</h3>
+                                    <p class="text-slate-600 text-sm">Preview your Wix site to ensure the PDF renders correctly. Make sure your PDF file is publicly accessible.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Squarespace Integration -->
+                    <div id="squarespaceContent" class="tab-content">
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Enable Code Injection</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Go to Settings > Advanced > Code Injection and add the PDF-render.js script to the header.</p>
+                                    <div class="code-block">
+                                        <code>&lt;script src="https://your-domain.com/pdf-render.js"&gt;&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Add a Code Block</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add a Code Block to your page where you want the PDF to appear.</p>
+                                    <div class="code-block">
+                                        <code>&lt;canvas id="pdfCanvas"&gt;&lt;/canvas&gt;
+&lt;script&gt;
+  const renderer = new PDFRenderer({
+    canvas: document.getElementById('pdfCanvas'),
+    scale: 1.5
+  });
+  
+  renderer.loadDocument('your-pdf-url.pdf')
+    .then(() => renderer.renderPage(1));
+&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Upload your PDF</h3>
+                                    <p class="text-slate-600 text-sm">Upload your PDF file to Squarespace and use the file URL in your code. Make sure the file is set to public access.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">4</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Test and publish</h3>
+                                    <p class="text-slate-600 text-sm">Preview your page to test the integration, then publish when ready.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Elementor Integration -->
+                    <div id="elementorContent" class="tab-content">
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Install PDF-render.js</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add the PDF-render.js script to your WordPress site's header using a plugin like "Insert Headers and Footers".</p>
+                                    <div class="code-block">
+                                        <code>&lt;script src="https://your-domain.com/pdf-render.js"&gt;&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Add HTML Widget</h3>
+                                    <p class="text-slate-600 text-sm mb-3">In Elementor editor, drag an HTML Widget to your page and add the following code:</p>
+                                    <div class="code-block">
+                                        <code>&lt;canvas id="pdfCanvas"&gt;&lt;/canvas&gt;
+&lt;script&gt;
+  const renderer = new PDFRenderer({
+    canvas: document.getElementById('pdfCanvas'),
+    scale: 1.5
+  });
+  
+  renderer.loadDocument('your-pdf-url.pdf')
+    .then(() => renderer.renderPage(1));
+&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Upload PDF to Media Library</h3>
+                                    <p class="text-slate-600 text-sm">Upload your PDF to WordPress Media Library and copy the file URL to use in your integration code.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">4</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Customize styling</h3>
+                                    <p class="text-slate-600 text-sm">Use Elementor's styling options to customize the appearance of your PDF viewer container.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HTML Integration -->
+                    <div id="htmlContent" class="tab-content">
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Include PDF.js and PDF-render.js</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add the required scripts to your HTML file's head section.</p>
+                                    <div class="code-block">
+                                        <code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"&gt;&lt;/script&gt;
+&lt;script src="pdf-render.js"&gt;&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Create canvas element</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add a canvas element to your HTML where the PDF will be rendered.</p>
+                                    <div class="code-block">
+                                        <code>&lt;canvas id="pdfCanvas"&gt;&lt;/canvas&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Initialize and render</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Add JavaScript to initialize the renderer and load your PDF.</p>
+                                    <div class="code-block">
+                                        <code>&lt;script&gt;
+  const renderer = new PDFRenderer({
+    canvas: document.getElementById('pdfCanvas'),
+    scale: 1.5
+  });
+  
+  renderer.loadDocument('your-pdf.pdf')
+    .then(() => renderer.renderPage(1))
+    .catch(error => console.error('Error:', error));
+&lt;/script&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">4</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Add annotations (optional)</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Enhance your PDF with annotations like highlights, text notes, and signatures.</p>
+                                    <div class="code-block">
+                                        <code>// Add highlight
+renderer.addHighlight(1, {
+  x: 100, y: 200, width: 200, height: 50
+}, '#ffff00');
+
+// Add text annotation
+renderer.addTextAnnotation(1, {
+  x: 100, y: 300
+}, 'Important note', '#ff0000');
+
+// Re-render to show annotations
+renderer.renderPage(1);</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="step-number">5</div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Complete example</h3>
+                                    <p class="text-slate-600 text-sm mb-3">Here's a complete working example with all features:</p>
+                                    <div class="code-block">
+                                        <code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;script src="pdf.min.js"&gt;&lt;/script&gt;
+  &lt;script src="pdf-render.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;canvas id="pdfCanvas"&gt;&lt;/canvas&gt;
+  
+  &lt;script&gt;
+    const renderer = new PDFRenderer({
+      canvas: document.getElementById('pdfCanvas'),
+      scale: 1.5
+    });
+    
+    renderer.loadDocument('document.pdf')
+      .then(() => {
+        renderer.renderPage(1);
+        renderer.addHighlight(1, {
+          x: 50, y: 100, width: 150, height: 30
+        }, '#ffff00');
+        renderer.renderPage(1);
+      });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Content').classList.add('active');
+            
+            // Add active class to selected tab button
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+    </script>
+
+</body>
+</html>

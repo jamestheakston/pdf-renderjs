@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - PDF-render.js</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center">
+            <a href="/" class="inline-flex items-center gap-2.5 group mb-6">
+                <div class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-md group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-file-pdf text-white"></i>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight text-slate-950">PDF-render<span class="text-emerald-600">.js</span></span>
+            </a>
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Welcome back</h1>
+            <p class="text-slate-600">Sign in to your account to continue</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white border border-slate-200/60 rounded-xl shadow-sm p-8">
+            <div class="text-center mb-6">
+                <p class="text-slate-600 mb-6">Sign in with your GitHub account</p>
+                <button onclick="signInWithGitHub()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all shadow-md flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-github text-2xl"></i>
+                    Continue with GitHub
+                </button>
+            </div>
+            
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-slate-200"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-slate-500">or</span>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-slate-600 text-sm">Don't have an account? <a href="/signup.html" class="text-emerald-600 hover:text-emerald-700 font-medium">Sign up</a></p>
+            </div>
+        </div>
+
+        <!-- Help Text -->
+        <div class="text-center">
+            <p class="text-slate-500 text-sm">
+                By signing in, you agree to our 
+                <a href="#" class="text-emerald-600 hover:text-emerald-700">Terms of Service</a> and 
+                <a href="#" class="text-emerald-600 hover:text-emerald-700">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SupabaseClient = supabase.createClient(
+            'https://biixliljqnnbfznxbtci.supabase.co',
+            'sb_publishable_n1kfuQkqv5ZRFgTBhpRtnQ_5qLPSjcT'
+        );
+
+        async function signInWithGitHub() {
+            try {
+                const { data, error } = await SupabaseClient.auth.signInWithOAuth({
+                    provider: 'github',
+                    options: {
+                        redirectTo: `${window.location.origin}/app.html`
+                    }
+                });
+
+                if (error) {
+                    alert('Error signing in with GitHub: ' + error.message);
+                    return;
+                }
+            } catch (error) {
+                alert('Error signing in with GitHub: ' + error.message);
+            }
+        }
+
+        // Check if user is already authenticated
+        async function checkAuth() {
+            try {
+                const { data: { session } } = await SupabaseClient.auth.getSession();
+                
+                if (session) {
+                    // User is already signed in, redirect to app
+                    window.location.href = '/app.html';
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+            }
+        }
+
+        // Check authentication on page load
+        checkAuth();
+    </script>
+</body>
+</html>
